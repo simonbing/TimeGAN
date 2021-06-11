@@ -300,8 +300,11 @@ def timegan (ori_data, ori_labels, parameters):
   print('Finish Joint Training')
     
   ## Synthetic data generation
-  Z_mb = random_generator(no, z_dim, ori_time, max_seq_len)
-  generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: ori_data, T: ori_time})    
+  Z_mb = random_generator(no, z_dim, ori_labels, ori_time, max_seq_len)
+  ori_data_and_labels = np.concatenate((ori_data, ori_labels), 2)
+  generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: ori_data_and_labels, labels: ori_labels, T: ori_time})
+  # Split off labels from data
+  generated_data_curr = generated_data_curr[..., :5]
     
   generated_data = list()
     
