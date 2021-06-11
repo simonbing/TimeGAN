@@ -304,7 +304,7 @@ def timegan (ori_data, ori_labels, parameters):
   ori_data_and_labels = np.concatenate((ori_data, ori_labels), 2)
   generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: ori_data_and_labels, labels: ori_labels, T: ori_time})
   # Split off labels from data
-  generated_data_curr = generated_data_curr[..., :5]
+  generated_data_curr = generated_data_curr[..., :dim]
     
   generated_data = list()
     

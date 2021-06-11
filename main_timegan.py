@@ -34,7 +34,7 @@ warnings.filterwarnings("ignore")
 # 1. TimeGAN model
 from timegan import timegan
 # 2. Data loading
-from data_loading import real_data_loading, sine_data_generation
+from data_loading import real_data_loading, sine_data_generation, mimic_data_loading
 # 3. Metrics
 from metrics.discriminative_metrics import discriminative_score_metrics
 from metrics.predictive_metrics import predictive_score_metrics
@@ -63,6 +63,8 @@ def main (args):
   ## Data loading
   if args.data_name in ['stock', 'energy']:
     ori_data = real_data_loading(args.data_name, args.seq_len)
+  elif args.data_name == 'mimic':
+    ori_data, ori_labels = mimic_data_loading(args.features_path, args.labels_path)
   elif args.data_name == 'sine':
     # Set number of samples and its dimensions
     no, dim = 10000, 5
@@ -118,8 +120,18 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument(
       '--data_name',
-      choices=['sine','stock','energy'],
+      choices=['mimic','sine','stock','energy'],
       default='stock',
+      type=str)
+  parser.add_argument(
+      '--features_path',
+      help='path to input features',
+      default=None,
+      type=str)
+  parser.add_argument(
+      '--labels_path',
+      help='path to input labels',
+      default=None,
       type=str)
   parser.add_argument(
       '--seq_len',

@@ -117,3 +117,40 @@ def real_data_loading (data_name, seq_len):
     data.append(temp_data[idx[i]])
     
   return data
+
+def mimic_data_loading(features_path, labels_path):
+  """
+
+  :param features_path:
+  :param labels_path:
+  :return:
+  """
+  X_dict = np.load(features_path)
+  y_dict = np.load(labels_path)
+
+  # Concatenate all input features
+  X_list = list()
+  m_list = list()
+  delta_t_list = list()
+  for file in X_dict.files:
+    if file != 'feature_names':
+      if file.startswith('X'):
+        X_list.append(X_dict[file])
+      elif file.startswith('m'):
+        m_list.append(X_dict[file])
+      if file.startswith('delta_t'):
+        delta_t_list.append(X_dict[file])
+  X_concat = np.concatenate(X_list)
+  m_concat = np.concatenate(m_list)
+  delta_t_concat = np.concatenate(delta_t_list)
+
+  data_concat = np.concatenate((X_concat, m_concat, delta_t_concat), axis=1)
+  data_concat = np.transpose(data_concat, (0, 2, 1))
+
+  # Concatenate labels
+  y_list = list()
+  for file in y_dict.files:
+    y_list.append(y_dict[file])
+  labels_concat = np.concatenate(y_list)
+
+  return data_concat, np.expand_dims(labels_concat, 1)
