@@ -66,7 +66,7 @@ def main (args):
   elif args.data_name == 'sine':
     # Set number of samples and its dimensions
     no, dim = 10000, 5
-    ori_data = sine_data_generation(no, args.seq_len, dim)
+    ori_data, ori_labels = sine_data_generation(no, args.seq_len, dim)
     
   print(args.data_name + ' dataset is ready.')
     
@@ -79,7 +79,7 @@ def main (args):
   parameters['iterations'] = args.iteration
   parameters['batch_size'] = args.batch_size
       
-  generated_data = timegan(ori_data, parameters)   
+  generated_data = timegan(ori_data, ori_labels, parameters)
   print('Finish Synthetic Data Generation')
   
   ## Performance metrics   

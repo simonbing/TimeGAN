@@ -49,6 +49,7 @@ def sine_data_generation (no, seq_len, dim):
     
   Returns:
     - data: generated data
+    - labels: randomly generated labels for the data
   """  
   # Initialize the output
   data = list()
@@ -73,8 +74,11 @@ def sine_data_generation (no, seq_len, dim):
     temp = (temp + 1)*0.5
     # Stack the generated data
     data.append(temp)
+
+  # Sample labels
+  labels = np.expand_dims(np.random.randint(2, size=no), 1)
                 
-  return data
+  return data, labels
     
 
 def real_data_loading (data_name, seq_len):

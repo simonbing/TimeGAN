@@ -22,7 +22,7 @@ import numpy as np
 from utils import extract_time, rnn_cell, random_generator, batch_generator
 
 
-def timegan (ori_data, parameters):
+def timegan (ori_data, ori_labels, parameters):
   """TimeGAN function.
   
   Use original data as training set to generater synthetic data (time-series)
@@ -39,6 +39,9 @@ def timegan (ori_data, parameters):
 
   # Basic Parameters
   no, seq_len, dim = np.asarray(ori_data).shape
+  # Expand labels to all time steps
+  ori_labels = np.transpose(np.tile(ori_labels, (1, 1, seq_len)), (1,2,0)).astype(np.float32)
+  y_dim = ori_labels.shape[2]
     
   # Maximum sequence length and each sequence length
   ori_time, max_seq_len = extract_time(ori_data)
@@ -77,8 +80,9 @@ def timegan (ori_data, parameters):
   gamma        = 1
     
   # Input place holders
-  X = tf.placeholder(tf.float32, [None, max_seq_len, dim], name = "myinput_x")
-  Z = tf.placeholder(tf.float32, [None, max_seq_len, z_dim], name = "myinput_z")
+  X = tf.placeholder(tf.float32, [None, max_seq_len, dim+y_dim], name = "myinput_x")
+  labels = tf.placeholder(tf.float32, [None, max_seq_len, y_dim], name = "myinput_labels")
+  Z = tf.placeholder(tf.float32, [None, max_seq_len, z_dim+y_dim], name = "myinput_z")
   T = tf.placeholder(tf.int32, [None], name = "myinput_t")
   
   def embedder (X, T):
@@ -110,7 +114,7 @@ def timegan (ori_data, parameters):
     with tf.variable_scope("recovery", reuse = tf.AUTO_REUSE):       
       r_cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell(module_name, hidden_dim) for _ in range(num_layers)])
       r_outputs, r_last_states = tf.nn.dynamic_rnn(r_cell, H, dtype=tf.float32, sequence_length = T)
-      X_tilde = tf.contrib.layers.fully_connected(r_outputs, dim, activation_fn=tf.nn.sigmoid) 
+      X_tilde = tf.contrib.layers.fully_connected(r_outputs, dim+y_dim, activation_fn=tf.nn.sigmoid)
     return X_tilde
     
   def generator (Z, T):  
@@ -163,12 +167,17 @@ def timegan (ori_data, parameters):
     
   # Embedder & Recovery
   H = embedder(X, T)
+  # Concatenate labels to latent codes (as conditioning)
+  H = tf.concat((H, labels), axis=2)
   X_tilde = recovery(H, T)
     
   # Generator
   E_hat = generator(Z, T)
+  E_hat = tf.concat((E_hat, labels), axis=2)
   H_hat = supervisor(E_hat, T)
+  H_hat = tf.concat((H_hat, labels), axis=2)
   H_hat_supervise = supervisor(H, T)
+  H_hat_supervise = tf.concat((H_hat_supervise, labels), axis=2)
     
   # Synthetic data
   X_hat = recovery(H_hat, T)
@@ -229,9 +238,9 @@ def timegan (ori_data, parameters):
     
   for itt in range(iterations):
     # Set mini-batch
-    X_mb, T_mb = batch_generator(ori_data, ori_time, batch_size)           
+    X_mb, labels_mb, T_mb = batch_generator(ori_data, ori_labels, ori_time, batch_size)
     # Train embedder        
-    _, step_e_loss = sess.run([E0_solver, E_loss_T0], feed_dict={X: X_mb, T: T_mb})        
+    _, step_e_loss = sess.run([E0_solver, E_loss_T0], feed_dict={X: X_mb, labels: labels_mb, T: T_mb})
     # Checkpoint
     if itt % 1000 == 0:
       print('step: '+ str(itt) + '/' + str(iterations) + ', e_loss: ' + str(np.round(np.sqrt(step_e_loss),4)) ) 
@@ -243,11 +252,11 @@ def timegan (ori_data, parameters):
     
   for itt in range(iterations):
     # Set mini-batch
-    X_mb, T_mb = batch_generator(ori_data, ori_time, batch_size)    
+    X_mb, labels_mb, T_mb = batch_generator(ori_data, ori_labels, ori_time, batch_size)
     # Random vector generation   
-    Z_mb = random_generator(batch_size, z_dim, T_mb, max_seq_len)
+    Z_mb = random_generator(batch_size, z_dim, labels_mb, T_mb, max_seq_len)
     # Train generator       
-    _, step_g_loss_s = sess.run([GS_solver, G_loss_S], feed_dict={Z: Z_mb, X: X_mb, T: T_mb})       
+    _, step_g_loss_s = sess.run([GS_solver, G_loss_S], feed_dict={Z: Z_mb, X: X_mb, labels: labels_mb, T: T_mb})
     # Checkpoint
     if itt % 1000 == 0:
       print('step: '+ str(itt)  + '/' + str(iterations) +', s_loss: ' + str(np.round(np.sqrt(step_g_loss_s),4)) )
@@ -261,24 +270,24 @@ def timegan (ori_data, parameters):
     # Generator training (twice more than discriminator training)
     for kk in range(2):
       # Set mini-batch
-      X_mb, T_mb = batch_generator(ori_data, ori_time, batch_size)               
+      X_mb, labels_mb, T_mb = batch_generator(ori_data, ori_labels, ori_time, batch_size)
       # Random vector generation
-      Z_mb = random_generator(batch_size, z_dim, T_mb, max_seq_len)
+      Z_mb = random_generator(batch_size, z_dim, labels_mb, T_mb, max_seq_len)
       # Train generator
-      _, step_g_loss_u, step_g_loss_s, step_g_loss_v = sess.run([G_solver, G_loss_U, G_loss_S, G_loss_V], feed_dict={Z: Z_mb, X: X_mb, T: T_mb})
+      _, step_g_loss_u, step_g_loss_s, step_g_loss_v = sess.run([G_solver, G_loss_U, G_loss_S, G_loss_V], feed_dict={Z: Z_mb, X: X_mb, labels: labels_mb, T: T_mb})
        # Train embedder        
-      _, step_e_loss_t0 = sess.run([E_solver, E_loss_T0], feed_dict={Z: Z_mb, X: X_mb, T: T_mb})   
+      _, step_e_loss_t0 = sess.run([E_solver, E_loss_T0], feed_dict={Z: Z_mb, X: X_mb, labels: labels_mb, T: T_mb})
            
     # Discriminator training        
     # Set mini-batch
-    X_mb, T_mb = batch_generator(ori_data, ori_time, batch_size)           
+    X_mb, labels_mb, T_mb = batch_generator(ori_data, ori_labels, ori_time, batch_size)
     # Random vector generation
-    Z_mb = random_generator(batch_size, z_dim, T_mb, max_seq_len)
+    Z_mb = random_generator(batch_size, z_dim, labels_mb, T_mb, max_seq_len)
     # Check discriminator loss before updating
-    check_d_loss = sess.run(D_loss, feed_dict={X: X_mb, T: T_mb, Z: Z_mb})
+    check_d_loss = sess.run(D_loss, feed_dict={X: X_mb, labels: labels_mb, T: T_mb, Z: Z_mb})
     # Train discriminator (only when the discriminator does not work well)
     if (check_d_loss > 0.15):        
-      _, step_d_loss = sess.run([D_solver, D_loss], feed_dict={X: X_mb, T: T_mb, Z: Z_mb})
+      _, step_d_loss = sess.run([D_solver, D_loss], feed_dict={X: X_mb, labels: labels_mb, T: T_mb, Z: Z_mb})
         
     # Print multiple checkpoints
     if itt % 1000 == 0:

@@ -102,12 +102,13 @@ def rnn_cell(module_name, hidden_dim):
   return rnn_cell
 
 
-def random_generator (batch_size, z_dim, T_mb, max_seq_len):
+def random_generator (batch_size, z_dim, labels_mb, T_mb, max_seq_len):
   """Random vector generation.
   
   Args:
     - batch_size: size of the random vector
     - z_dim: dimension of random vector
+    - labels_mb: mini-batch of labels to concatenate to random vector
     - T_mb: time information for the random vector
     - max_seq_len: maximum sequence length
     
@@ -119,27 +120,31 @@ def random_generator (batch_size, z_dim, T_mb, max_seq_len):
     temp = np.zeros([max_seq_len, z_dim])
     temp_Z = np.random.uniform(0., 1, [T_mb[i], z_dim])
     temp[:T_mb[i],:] = temp_Z
-    Z_mb.append(temp_Z)
+    temp_Z_cat = np.concatenate((temp_Z, labels_mb[i]), 1)
+    Z_mb.append(temp_Z_cat)
   return Z_mb
 
 
-def batch_generator(data, time, batch_size):
+def batch_generator(data, labels, time, batch_size):
   """Mini-batch generator.
   
   Args:
     - data: time-series data
+    - labels: labels for time series
     - time: time information
     - batch_size: the number of samples in each batch
     
   Returns:
     - X_mb: time-series data in each batch
+    - labels_mb: labels in each batch
     - T_mb: time information in each batch
   """
   no = len(data)
   idx = np.random.permutation(no)
   train_idx = idx[:batch_size]     
             
-  X_mb = list(data[i] for i in train_idx)
+  X_mb = list(np.concatenate((data[i], labels[i]), 1) for i in train_idx)
+  labels_mb = list(labels[i] for i in train_idx)
   T_mb = list(time[i] for i in train_idx)
   
-  return X_mb, T_mb
+  return X_mb, labels_mb, T_mb
