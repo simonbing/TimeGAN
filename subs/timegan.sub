@@ -1,0 +1,19 @@
+executable = /home/sbing/miniconda3/envs/timegan/bin/python3
+arguments = /home/sbing/thesis/git/TimeGAN/main_timegan.py \
+--features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/X_6hrs_15min_34472_vent_bin_proc.npz \
+--labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/y_6hrs_15min_34472_vent_bin_proc.npz \
+--out_path /home/sbing/thesis/git/TimeGAN/experiments/debug/debug0 \
+--hidden_dim 16 --batch_size 64 --epochs 100 --save True
+
+request_memory = 64000
+request_cpus = 8
+request_gpus = 1
+getenv = True
+
+requirements = CUDACapability>=6.0
+
+error = /home/sbing/thesis/git/TimeGAN/experiments/debug/test0_$(Cluster).err
+output = /home/sbing/thesis/git/TimeGAN/experiments/debug/test0_$(Cluster).out
+log = /home/sbing/thesis/git/TimeGAN/experiments/debug/test0_$(Cluster).log
+
+queue
