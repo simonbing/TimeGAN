@@ -19,6 +19,7 @@ Note: Use original data as training set to generater synthetic data (time-series
 # Necessary Packages
 import tensorflow as tf
 import numpy as np
+import wandb
 from utils import extract_time, rnn_cell, random_generator, batch_generator
 
 
@@ -74,10 +75,15 @@ def timegan (ori_data, ori_labels, parameters):
   hidden_dim   = parameters['hidden_dim'] 
   num_layers   = parameters['num_layer']
   iterations   = parameters['iterations']
+  epochs       = parameters['epochs']
   batch_size   = parameters['batch_size']
   module_name  = parameters['module'] 
   z_dim        = dim
   gamma        = 1
+
+  if epochs is not None:
+    iters_per_epoch = no // batch_size
+    iterations = iters_per_epoch * epochs
     
   # Input place holders
   X = tf.placeholder(tf.float32, [None, max_seq_len, dim+y_dim], name = "myinput_x")
@@ -235,21 +241,27 @@ def timegan (ori_data, ori_labels, parameters):
     
   # 1. Embedding network training
   print('Start Embedding Network Training')
-    
+
+  epoch_count = 0
   for itt in range(iterations):
     # Set mini-batch
     X_mb, labels_mb, T_mb = batch_generator(ori_data, ori_labels, ori_time, batch_size)
     # Train embedder        
     _, step_e_loss = sess.run([E0_solver, E_loss_T0], feed_dict={X: X_mb, labels: labels_mb, T: T_mb})
-    # Checkpoint
-    if itt % 1000 == 0:
-      print('step: '+ str(itt) + '/' + str(iterations) + ', e_loss: ' + str(np.round(np.sqrt(step_e_loss),4)) ) 
+    # Epoch checkpoint
+    if itt % iters_per_epoch == 0:
+
+      print('step: '+ str(itt) + '/' + str(iterations) + ', e_loss: ' + str(np.round(np.sqrt(step_e_loss),4)) )
+      # wandb logging
+      wandb.log({'e_loss': step_e_loss, 'epoch': epoch_count})
+      epoch_count += 1
       
   print('Finish Embedding Network Training')
     
   # 2. Training only with supervised loss
   print('Start Training with Supervised Loss Only')
-    
+
+  epoch_count = 0
   for itt in range(iterations):
     # Set mini-batch
     X_mb, labels_mb, T_mb = batch_generator(ori_data, ori_labels, ori_time, batch_size)
@@ -258,14 +270,18 @@ def timegan (ori_data, ori_labels, parameters):
     # Train generator       
     _, step_g_loss_s = sess.run([GS_solver, G_loss_S], feed_dict={Z: Z_mb, X: X_mb, labels: labels_mb, T: T_mb})
     # Checkpoint
-    if itt % 1000 == 0:
+    if itt % iters_per_epoch == 0:
       print('step: '+ str(itt)  + '/' + str(iterations) +', s_loss: ' + str(np.round(np.sqrt(step_g_loss_s),4)) )
+      # wandb logging
+      wandb.log({'s_loss': step_g_loss_s, 'epoch': epoch_count})
+      epoch_count += 1
       
   print('Finish Training with Supervised Loss Only')
     
   # 3. Joint Training
   print('Start Joint Training')
-  
+
+  epoch_count = 0
   for itt in range(iterations):
     # Generator training (twice more than discriminator training)
     for kk in range(2):
@@ -290,13 +306,21 @@ def timegan (ori_data, ori_labels, parameters):
       _, step_d_loss = sess.run([D_solver, D_loss], feed_dict={X: X_mb, labels: labels_mb, T: T_mb, Z: Z_mb})
         
     # Print multiple checkpoints
-    if itt % 1000 == 0:
+    if itt % iters_per_epoch == 0:
       print('step: '+ str(itt) + '/' + str(iterations) + 
             ', d_loss: ' + str(np.round(step_d_loss,4)) + 
             ', g_loss_u: ' + str(np.round(step_g_loss_u,4)) + 
             ', g_loss_s: ' + str(np.round(np.sqrt(step_g_loss_s),4)) + 
             ', g_loss_v: ' + str(np.round(step_g_loss_v,4)) + 
             ', e_loss_t0: ' + str(np.round(np.sqrt(step_e_loss_t0),4))  )
+      # wandb logging
+      wandb.log({'d_loss': step_d_loss,
+                 'g_loss_u': step_g_loss_u,
+                 'g_loss_s': step_g_loss_s,
+                 'g_loss_v': step_g_loss_v,
+                 'e_loss_t0': step_e_loss_t0,
+                 'epoch': epoch_count})
+      epoch_count += 1
   print('Finish Joint Training')
     
   ## Synthetic data generation
@@ -304,16 +328,17 @@ def timegan (ori_data, ori_labels, parameters):
   ori_data_and_labels = np.concatenate((ori_data, ori_labels), 2)
   generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: ori_data_and_labels, labels: ori_labels, T: ori_time})
   # Split off labels from data
-  generated_data_curr = generated_data_curr[..., :dim]
+  generated_feats_curr = generated_data_curr[..., :dim]
+  generated_labels = ori_labels[:, 0, :].squeeze()
     
   generated_data = list()
     
   for i in range(no):
-    temp = generated_data_curr[i,:ori_time[i],:]
+    temp = generated_feats_curr[i,:ori_time[i],:]
     generated_data.append(temp)
         
   # Renormalization
   generated_data = generated_data * max_val
   generated_data = generated_data + min_val
     
-  return generated_data
+  return generated_data, generated_labels

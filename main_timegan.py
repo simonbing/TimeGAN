@@ -28,6 +28,9 @@ from __future__ import print_function
 
 import argparse
 import numpy as np
+import tensorflow as tf
+import os
+import wandb
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -79,10 +82,19 @@ def main (args):
   parameters['hidden_dim'] = args.hidden_dim
   parameters['num_layer'] = args.num_layer
   parameters['iterations'] = args.iteration
+  parameters['epochs'] = args.epochs
   parameters['batch_size'] = args.batch_size
       
-  generated_data = timegan(ori_data, ori_labels, parameters)
+  generated_data, generated_labels = timegan(ori_data, ori_labels, parameters)
   print('Finish Synthetic Data Generation')
+
+  if args.save:
+      # Save generated data
+      if not os.path.isdir(args.out_path):
+          os.makedirs(args.out_path)
+      np.save(os.path.join(args.out_path, 'gen_feats.npy'), generated_data)
+      np.save(os.path.join(args.out_path, 'gen_labels.npy'), generated_labels)
+      print('Saved generated data!')
   
   ## Performance metrics   
   # Output initialization
@@ -159,17 +171,54 @@ if __name__ == '__main__':
       default=50000,
       type=int)
   parser.add_argument(
+      '--epochs',
+      help='Training epochs (should be optimized)',
+      default=None,
+      type=int)
+  parser.add_argument(
       '--batch_size',
       help='the number of samples in mini-batch (should be optimized)',
       default=128,
       type=int)
+  parser.add_argument(
+      '--out_path',
+      help='path where to save generated data',
+      default=None,
+      type=str)
+  parser.add_argument(
+      '--save',
+      help='whether or not to save generated data',
+      default=False,
+      type=bool)
   parser.add_argument(
       '--metric_iteration',
       help='iterations of the metric computation',
       default=10,
       type=int)
   
-  args = parser.parse_args() 
+  args = parser.parse_args()
+
+  # init wandb logging
+  config = dict(
+      batch_size=args.batch_size,
+      hidden_size=args.hidden_dim,
+      pred_task="vent_bin"
+  )
+
+  use_cuda = tf.test.is_gpu_available()
+  if use_cuda:
+      print('Running on GPU!')
+  else:
+      print('Running in CPU!')
+
+  wandb.init(
+      project='medgen',
+      entity='bings',
+      group='TimeGAN',
+      job_type='cluster' if use_cuda else 'local',
+      mode='online' if use_cuda else 'offline',
+      config=config
+  )
   
   # Calls main function  
   ori_data, generated_data, metrics = main(args)
