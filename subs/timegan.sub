@@ -3,7 +3,7 @@ arguments = /home/sbing/thesis/git/TimeGAN/main_timegan.py \
 --features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/X_6hrs_15min_34472_vent_bin_proc.npz \
 --labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/y_6hrs_15min_34472_vent_bin_proc.npz \
 --out_path /home/sbing/thesis/git/TimeGAN/experiments/debug/debug0 \
---hidden_dim 16 --batch_size 64 --epochs 100 --save True
+--data_name mimic --hidden_dim 16 --batch_size 64 --epochs 100 --save True
 
 request_memory = 64000
 request_cpus = 8
