@@ -204,7 +204,8 @@ if __name__ == '__main__':
   config = dict(
       batch_size=args.batch_size,
       hidden_size=args.hidden_dim,
-      pred_task="vent_bin"
+      pred_task="vent_bin",
+      gen_model="timegan"
   )
 
   use_cuda = tf.test.is_gpu_available()
