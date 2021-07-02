@@ -22,6 +22,8 @@ utils.py
 
 ## Necessary Packages
 import numpy as np
+#from medgen.data_access.preprocessing import MissingnessDeltaT
+from sklearn.model_selection import train_test_split
 import tensorflow as tf
 
 
@@ -148,3 +150,57 @@ def batch_generator(data, labels, time, batch_size):
   T_mb = list(time[i] for i in train_idx)
   
   return X_mb, labels_mb, T_mb
+
+def reshape_synth_data(X_synth, y_synth):
+  """
+  Reshapes generated data for later evaluation.
+  """
+  random_state = np.random.RandomState(0)
+
+  X_synth = np.transpose(X_synth, (0, 2, 1))
+
+  X, m, delta_t = np.split(X_synth, 3, axis=1)
+  X, m, delta_t = MissingnessDeltaT().transform(X).values()
+  X_stack = np.stack((X, m, delta_t), axis=1)
+
+  val_fraction = 0.15
+  test_fraction = 0.15
+  train_fraction = 1.0 - val_fraction - test_fraction
+
+  if len(y_synth.shape) == 1:  # stratify only if we have a single task
+    y_strat = y_synth
+  else:
+    y_strat = None
+
+  X_synth_train, X_intermed, y_synth_train, y_intermed = train_test_split(
+    X_stack, y_synth,
+    test_size=1 - train_fraction,
+    random_state=random_state,
+    stratify=y_strat)
+  if y_strat is not None:
+    y_intermed_strat = y_intermed
+  else:
+    y_intermed_strat = None
+  X_synth_val, X_synth_test, y_synth_val, y_synth_test = train_test_split(
+    X_intermed, y_intermed,
+    test_size=test_fraction / (test_fraction + val_fraction),
+    random_state=random_state,
+    stratify=y_intermed_strat)
+  X_synth_dict = {
+    'X_train': X_synth_train[:, 0, ...],
+    'X_val': X_synth_val[:, 0, ...],
+    'X_test': X_synth_test[:, 0, ...],
+    'm_train': X_synth_train[:, 1, ...],
+    'm_val': X_synth_val[:, 1, ...],
+    'm_test': X_synth_test[:, 1, ...],
+    'delta_t_train': X_synth_train[:, 2, ...],
+    'delta_t_val': X_synth_val[:, 2, ...],
+    'delta_t_test': X_synth_test[:, 2, ...]
+  }
+  y_synth_dict = {
+    'y_train': y_synth_train,
+    'y_val': y_synth_val,
+    'y_test': y_synth_test,
+  }
+
+  return X_synth_dict, y_synth_dict

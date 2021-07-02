@@ -29,6 +29,7 @@ from __future__ import print_function
 import argparse
 import numpy as np
 import tensorflow as tf
+from utils import reshape_synth_data
 import os
 import wandb
 import warnings
@@ -67,7 +68,7 @@ def main (args):
   if args.data_name in ['stock', 'energy']:
     ori_data = real_data_loading(args.data_name, args.seq_len)
   elif args.data_name == 'mimic':
-    ori_data, ori_labels = mimic_data_loading(args.features_path, args.labels_path)
+    ori_data_train, ori_labels_train, ori_data_full, ori_labels_full = mimic_data_loading(args.features_path, args.labels_path)
   elif args.data_name == 'sine':
     # Set number of samples and its dimensions
     no, dim = 10000, 5
@@ -85,7 +86,7 @@ def main (args):
   parameters['epochs'] = args.epochs
   parameters['batch_size'] = args.batch_size
       
-  generated_data, generated_labels = timegan(ori_data, ori_labels, parameters)
+  generated_data, generated_labels = timegan(ori_data_train, ori_labels_train, ori_data_full, ori_labels_full, parameters)
   print('Finish Synthetic Data Generation')
 
   if args.save:
@@ -95,6 +96,11 @@ def main (args):
       np.save(os.path.join(args.out_path, 'gen_feats.npy'), generated_data)
       np.save(os.path.join(args.out_path, 'gen_labels.npy'), generated_labels)
       print('Saved generated data!')
+      # Reshape generated data
+      X_synth_dict, y_synth_dict = reshape_synth_data(generated_data, generated_labels)
+      np.savez('X_synth.npz', **X_synth_dict)
+      np.savez('y_synth.npz', **y_synth_dict)
+      print('Saved reshaped generated data!')
   
   ## Performance metrics   
   # Output initialization
@@ -188,6 +194,11 @@ if __name__ == '__main__':
       default=None,
       type=str)
   parser.add_argument(
+      '--run_name',
+      help='wandb run nume',
+      default=None,
+      type=str)
+  parser.add_argument(
       '--save',
       help='whether or not to save generated data',
       default=False,
@@ -217,11 +228,14 @@ if __name__ == '__main__':
   wandb.init(
       project='medgen',
       entity='bings',
-      group='TimeGAN',
+      group='TimeGAN sweep',
       job_type='cluster' if use_cuda else 'local',
       mode='online' if use_cuda else 'offline',
       config=config
   )
+
+  if args.run_name is not None:
+      wandb.run.name = args.run_name
   
   # Calls main function  
   ori_data, generated_data, metrics = main(args)

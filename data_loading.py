@@ -133,24 +133,39 @@ def mimic_data_loading(features_path, labels_path):
   m_list = list()
   delta_t_list = list()
   for file in X_dict.files:
-    if file != 'feature_names':
+    if file != 'feature_names' and not file.endswith('test'):
       if file.startswith('X'):
         X_list.append(X_dict[file])
       elif file.startswith('m'):
         m_list.append(X_dict[file])
       if file.startswith('delta_t'):
         delta_t_list.append(X_dict[file])
-  X_concat = np.concatenate(X_list)
-  m_concat = np.concatenate(m_list)
-  delta_t_concat = np.concatenate(delta_t_list)
+  X_concat_train = np.concatenate(X_list)
+  m_concat_train = np.concatenate(m_list)
+  delta_t_concat_train = np.concatenate(delta_t_list)
 
-  data_concat = np.concatenate((X_concat, m_concat, delta_t_concat), axis=1)
-  data_concat = np.transpose(data_concat, (0, 2, 1))
+  data_concat_train = np.concatenate((X_concat_train, m_concat_train, delta_t_concat_train), axis=1)
+  data_concat_train = np.transpose(data_concat_train, (0, 2, 1))
+
+  # Full data (for generation)
+  X_list.append(X_dict['X_test'])
+  m_list.append(X_dict['m_test'])
+  delta_t_list.append(X_dict['delta_t_test'])
+  X_concat_full = np.concatenate(X_list)
+  m_concat_full = np.concatenate(m_list)
+  delta_t_concat_full = np.concatenate(delta_t_list)
+
+  data_concat_full = np.concatenate((X_concat_full, m_concat_full, delta_t_concat_full), axis=1)
+  data_concat_full = np.transpose(data_concat_full, (0, 2, 1))
 
   # Concatenate labels
   y_list = list()
   for file in y_dict.files:
-    y_list.append(y_dict[file])
-  labels_concat = np.concatenate(y_list)
+    if not file.endswith('test'):
+      y_list.append(y_dict[file])
+  labels_concat_train = np.concatenate(y_list)
 
-  return data_concat, np.expand_dims(labels_concat, 1)
+  y_list.append(y_dict['y_test'])
+  labels_concat_full = np.concatenate(y_list)
+
+  return data_concat_train, np.expand_dims(labels_concat_train, 1), data_concat_full, np.expand_dims(labels_concat_full, 1)

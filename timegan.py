@@ -23,7 +23,7 @@ import wandb
 from utils import extract_time, rnn_cell, random_generator, batch_generator
 
 
-def timegan (ori_data, ori_labels, parameters):
+def timegan(ori_data, ori_labels, gen_data, gen_labels, parameters):
   """TimeGAN function.
   
   Use original data as training set to generater synthetic data (time-series)
@@ -35,17 +35,24 @@ def timegan (ori_data, ori_labels, parameters):
   Returns:
     - generated_data: generated time-series data
   """
+  # Manually set random seed for reproducibility
+  tf.random.set_random_seed(0)
+
   # Initialization on the Graph
   tf.reset_default_graph()
 
   # Basic Parameters
   no, seq_len, dim = np.asarray(ori_data).shape
+  no_gen, seq_len_gen, dim_gen = np.asarray(gen_data).shape
   # Expand labels to all time steps
   ori_labels = np.transpose(np.tile(ori_labels, (1, 1, seq_len)), (1,2,0)).astype(np.float32)
+  gen_labels = np.transpose(np.tile(gen_labels, (1, 1, seq_len)), (1,2,0)).astype(np.float32)
+
   y_dim = ori_labels.shape[2]
     
   # Maximum sequence length and each sequence length
   ori_time, max_seq_len = extract_time(ori_data)
+  gen_time, max_seq_len_gen = extract_time(gen_data)
   
   def MinMaxScaler(data):
     """Min-Max Normalizer.
@@ -68,6 +75,7 @@ def timegan (ori_data, ori_labels, parameters):
   
   # Normalization
   ori_data, min_val, max_val = MinMaxScaler(ori_data)
+  gen_data, _, _ = MinMaxScaler(gen_data)
               
   ## Build a RNN networks          
   
@@ -324,17 +332,17 @@ def timegan (ori_data, ori_labels, parameters):
   print('Finish Joint Training')
     
   ## Synthetic data generation
-  Z_mb = random_generator(no, z_dim, ori_labels, ori_time, max_seq_len)
-  ori_data_and_labels = np.concatenate((ori_data, ori_labels), 2)
-  generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: ori_data_and_labels, labels: ori_labels, T: ori_time})
+  Z_mb = random_generator(no_gen, z_dim, gen_labels, gen_time, max_seq_len_gen)
+  gen_data_and_labels = np.concatenate((gen_data, gen_labels), 2)
+  generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: gen_data_and_labels, labels: gen_labels, T: gen_time})
   # Split off labels from data
   generated_feats_curr = generated_data_curr[..., :dim]
-  generated_labels = ori_labels[:, 0, :].squeeze()
+  generated_labels = gen_labels[:, 0, :].squeeze()
     
   generated_data = list()
     
-  for i in range(no):
-    temp = generated_feats_curr[i,:ori_time[i],:]
+  for i in range(no_gen):
+    temp = generated_feats_curr[i,:gen_time[i],:]
     generated_data.append(temp)
         
   # Renormalization
