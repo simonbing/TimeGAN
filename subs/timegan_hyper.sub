@@ -2,8 +2,8 @@ executable = /home/sbing/miniconda3/envs/timegan/bin/python3
 arguments = "/home/sbing/thesis/git/TimeGAN/main_timegan.py \
 --features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/X_6hrs_15min_17235_vent_bin_proc.npz \
 --labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/y_6hrs_15min_17235_vent_bin_proc.npz \
---out_path /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/exp_$(Process) \
---data_name mimic --hidden_dim $(HID_DIM) --batch_size $(BS) --num_layer $(NUM_LAYER) --epochs 100 --save True --run_name 'timegan hyperparams combo $(Process)'"
+--out_path /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process) \
+--data_name mimic --hidden_dim $(HID_DIM) --batch_size $(BS) --num_layer $(NUM_LAYER) --epochs 100 --save True --run_name 'timegan feats only hyperparams $(Process)'"
 
 request_memory = 64000
 request_cpus = 8
@@ -12,9 +12,9 @@ getenv = True
 
 requirements = CUDACapability>=6.0
 
-error = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats_$(Process).err
-output = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats_$(Process).out
-log = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats_$(Process).log
+error = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process).err
+output = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process).out
+log = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process).log
 
 queue 1 HID_DIM, NUM_LAYER, BS from (
   32, 5, 64
