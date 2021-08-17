@@ -98,8 +98,8 @@ def main (args):
       print('Saved generated data!')
       # Reshape generated data
       X_synth_dict, y_synth_dict = reshape_synth_data(generated_data, generated_labels)
-      np.savez('X_synth.npz', **X_synth_dict)
-      np.savez('y_synth.npz', **y_synth_dict)
+      np.savez(os.path.join(args.out_path,'X_synth.npz'), **X_synth_dict)
+      np.savez(os.path.join(args.out_path,'y_synth.npz'), **y_synth_dict)
       print('Saved reshaped generated data!')
   
   ## Performance metrics   
