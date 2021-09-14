@@ -163,7 +163,7 @@ def mimic_data_loading(features_path, labels_path):
   # Concatenate labels
   y_list = list()
   for file in y_dict.files:
-    if not file.endswith('test'):
+    if file.startswith('y') and not file.endswith('test'):
       y_list.append(y_dict[file])
   labels_concat_train = np.concatenate(y_list)
 

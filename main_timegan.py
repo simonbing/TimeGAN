@@ -85,6 +85,7 @@ def main (args):
   parameters['iterations'] = args.iteration
   parameters['epochs'] = args.epochs
   parameters['batch_size'] = args.batch_size
+  parameters['seed'] = args.seed
       
   generated_data, generated_labels = timegan(ori_data_train, ori_labels_train, ori_data_full, ori_labels_full, parameters)
   print('Finish Synthetic Data Generation')
@@ -187,6 +188,11 @@ if __name__ == '__main__':
       '--batch_size',
       help='the number of samples in mini-batch (should be optimized)',
       default=128,
+      type=int)
+  parser.add_argument(
+      '--seed',
+      help='random seed',
+      default=0,
       type=int)
   parser.add_argument(
       '--out_path',
