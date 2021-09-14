@@ -1,9 +1,9 @@
 executable = /home/sbing/miniconda3/envs/timegan/bin/python3
 arguments = "/home/sbing/thesis/git/TimeGAN/main_timegan.py \
---features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/X_6hrs_15min_17235_vent_bin_proc.npz \
---labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/y_6hrs_15min_17235_vent_bin_proc.npz \
---out_path /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process) \
---data_name mimic --hidden_dim $(HID_DIM) --batch_size $(BS) --num_layer $(NUM_LAYER) --epochs 100 --save True --run_name 'timegan feats only hyperparams $(Process)'"
+--features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/X_6hrs_15min_34472_vent_bin_proc_50_feats.npz \
+--labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/y_6hrs_15min_34472_vent_bin_proc.npz \
+--out_path /home/sbing/thesis/git/TimeGAN/experiments/timegan_exps/all_pats/feats_only/all_pats_50_feats_$(Process) \
+--data_name mimic --hidden_dim 32 --batch_size 64 --num_layer 5 --epochs 100 --save True --run_name 'timegan all pats 50 feats $(Process)'"
 
 request_memory = 64000
 request_cpus = 8
@@ -12,29 +12,29 @@ getenv = True
 
 requirements = CUDACapability>=6.0
 
-error = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process).err
-output = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process).out
-log = /home/sbing/thesis/git/TimeGAN/experiments/timegan_hyperparams/less_pats/feats_only/exp_$(Process).log
+error = /home/sbing/thesis/git/TimeGAN/experiments/timegan_exps/all_pats/feats_only/all_pats_50_feats_$(Process).err
+output = /home/sbing/thesis/git/TimeGAN/experiments/timegan_exps/all_pats/feats_only/all_pats_50_feats_$(Process).out
+log = /home/sbing/thesis/git/TimeGAN/experiments/timegan_exps/all_pats/feats_only/all_pats_50_feats_$(Process).log
 
-queue 1 HID_DIM, NUM_LAYER, BS from (
-  32, 5, 64
-  16, 2, 64
-  32, 2, 128
-  8, 2, 64
-  24, 3, 32
-  32, 5, 128
-  32, 3, 64
-  8, 5, 64
-  8, 5, 32
-  24, 5, 64
-  24, 2, 32
-  16, 2, 32
-  24, 3, 128
-  16, 3, 64
-  16, 5, 128
-  32, 2, 32
-  32, 2, 64
-  32, 3, 32
-  32, 3, 128
-  16, 5, 64
-)
+#queue 1 HID_DIM, NUM_LAYER, BS from (
+#  32, 5, 64
+#  16, 2, 64
+#  32, 2, 128
+#  8, 2, 64
+#  24, 3, 32
+#  32, 5, 128
+#  32, 3, 64
+#  8, 5, 64
+#  8, 5, 32
+#  24, 5, 64
+#  24, 2, 32
+#  16, 2, 32
+#  24, 3, 128
+#  16, 3, 64
+#  16, 5, 128
+#  32, 2, 32
+#  32, 2, 64
+#  32, 3, 32
+#  32, 3, 128
+#  16, 5, 64
+#)
