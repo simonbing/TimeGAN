@@ -144,8 +144,8 @@ def mimic_data_loading(features_path, labels_path):
   m_concat_train = np.concatenate(m_list)
   delta_t_concat_train = np.concatenate(delta_t_list)
 
-  data_concat_train = np.concatenate((X_concat_train, m_concat_train, delta_t_concat_train), axis=1)
-  # data_concat_train = X_concat_train
+  # data_concat_train = np.concatenate((X_concat_train, m_concat_train, delta_t_concat_train), axis=1)
+  data_concat_train = X_concat_train
   data_concat_train = np.transpose(data_concat_train, (0, 2, 1))
 
   # Full data (for generation)
@@ -156,8 +156,8 @@ def mimic_data_loading(features_path, labels_path):
   m_concat_full = np.concatenate(m_list)
   delta_t_concat_full = np.concatenate(delta_t_list)
 
-  data_concat_full = np.concatenate((X_concat_full, m_concat_full, delta_t_concat_full), axis=1)
-  # data_concat_full = X_concat_full
+  # data_concat_full = np.concatenate((X_concat_full, m_concat_full, delta_t_concat_full), axis=1)
+  data_concat_full = X_concat_full
   data_concat_full = np.transpose(data_concat_full, (0, 2, 1))
 
   # Concatenate labels
