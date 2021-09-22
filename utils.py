@@ -159,8 +159,8 @@ def reshape_synth_data(X_synth, y_synth):
 
   X_synth = np.transpose(X_synth, (0, 2, 1))
 
-  # X, m, delta_t = np.split(X_synth, 3, axis=1)
-  X = X_synth
+  X, m, delta_t = np.split(X_synth, 3, axis=1)
+  # X = X_synth
   X, m, delta_t = MissingnessDeltaT().transform(X).values()
   X_stack = np.stack((X, m, delta_t), axis=1)
 
