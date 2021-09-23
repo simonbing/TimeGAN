@@ -20,7 +20,7 @@ Note: Use original data as training set to generater synthetic data (time-series
 import tensorflow as tf
 import numpy as np
 import wandb
-from utils import extract_time, rnn_cell, random_generator, batch_generator
+from utils import extract_time, rnn_cell, random_generator, batch_generator, get_synth_labels
 
 
 def timegan(ori_data, ori_labels, gen_data, gen_labels, parameters):
@@ -332,12 +332,14 @@ def timegan(ori_data, ori_labels, gen_data, gen_labels, parameters):
   print('Finish Joint Training')
     
   ## Synthetic data generation
-  Z_mb = random_generator(no_gen, z_dim, gen_labels, gen_time, max_seq_len_gen)
-  gen_data_and_labels = np.concatenate((gen_data, gen_labels), 2)
-  generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: gen_data_and_labels, labels: gen_labels, T: gen_time})
+  # Get labels for conditional generation
+  gen_cond_labels = get_synth_labels(gen_labels, split=parameters['split'])
+  Z_mb = random_generator(no_gen, z_dim, gen_cond_labels, gen_time, max_seq_len_gen)
+  gen_data_and_labels = np.concatenate((gen_data, gen_cond_labels), 2)
+  generated_data_curr = sess.run(X_hat, feed_dict={Z: Z_mb, X: gen_data_and_labels, labels: gen_cond_labels, T: gen_time})
   # Split off labels from data
   generated_feats_curr = generated_data_curr[..., :dim]
-  generated_labels = gen_labels[:, 0, :].squeeze()
+  generated_labels = gen_cond_labels[:, 0, :].squeeze()
     
   generated_data = list()
     

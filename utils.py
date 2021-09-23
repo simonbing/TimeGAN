@@ -205,3 +205,13 @@ def reshape_synth_data(X_synth, y_synth):
   }
 
   return X_synth_dict, y_synth_dict
+
+def get_synth_labels(labels_orig, split=None):
+  if split is None:
+    return labels_orig
+  else:
+    labels = np.random.choice([0., 1.], size=len(labels_orig), p=[1-split, split])
+    # expand dims
+    seq_len = labels_orig.shape[1]
+    labels = np.transpose(np.tile(labels, (1, seq_len, 1)), (2,1,0)).astype(np.float32)
+    return labels

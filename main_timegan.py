@@ -86,6 +86,7 @@ def main (args):
   parameters['epochs'] = args.epochs
   parameters['batch_size'] = args.batch_size
   parameters['seed'] = args.seed
+  parameters['split'] = args.split
       
   generated_data, generated_labels = timegan(ori_data_train, ori_labels_train, ori_data_full, ori_labels_full, parameters)
   print('Finish Synthetic Data Generation')
@@ -205,6 +206,16 @@ if __name__ == '__main__':
       default=None,
       type=str)
   parser.add_argument(
+      '--group',
+      help='wandb group name',
+      default='TimeGAN',
+      type=str)
+  parser.add_argument(
+      '--subgroup',
+      help='wandb subgroup name',
+      default='General',
+      type=str)
+  parser.add_argument(
       '--save',
       help='whether or not to save generated data',
       default=False,
@@ -214,12 +225,19 @@ if __name__ == '__main__':
       help='iterations of the metric computation',
       default=10,
       type=int)
+  parser.add_argument(
+      '--split',
+      help='split for synthetic data',
+      default=None,
+      type=float
+  )
   
   args = parser.parse_args()
 
   # init wandb logging
   config = dict(
       batch_size=args.batch_size,
+      subgroup=args.subgroup,
       hidden_size=args.hidden_dim,
       pred_task="vent_bin",
       gen_model="timegan"
@@ -234,7 +252,7 @@ if __name__ == '__main__':
   wandb.init(
       project='medgen',
       entity='bings',
-      group='TimeGAN sweep',
+      group=args.group,
       job_type='cluster' if use_cuda else 'local',
       mode='online' if use_cuda else 'offline',
       config=config
