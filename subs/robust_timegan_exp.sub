@@ -2,9 +2,9 @@ executable = /home/sbing/miniconda3/envs/timegan/bin/python3
 arguments = "/home/sbing/thesis/git/TimeGAN/main_timegan.py --seed $(SEED) \
 --features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/X_6hrs_15min_17235_vent_bin_proc.npz \
 --labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/refactor_test/y_6hrs_15min_17235_vent_bin_proc.npz \
---out_path /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_20_synth_$(SEED) \
---data_name mimic --hidden_dim 32 --batch_size 64 --num_layer 5 --epochs 100 --save True --split 0.2 \
---group robust_timegan_exps --subgroup '20% synth' --run_name 'seed: $(SEED)'"
+--out_path /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_30_synth_$(SEED) \
+--data_name mimic --hidden_dim 32 --batch_size 64 --num_layer 5 --epochs 100 --save True --split 0.3 \
+--group robust_timegan_exps --subgroup '30% synth' --run_name 'seed: $(SEED)'"
 
 request_memory = 64000
 request_cpus = 8
@@ -13,8 +13,8 @@ getenv = True
 
 requirements = CUDACapability>=6.0
 
-error = /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_20_synth_$(SEED).err
-output = /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_20_synth_$(SEED).out
-log = /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_20_synth_$(SEED).log
+error = /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_30_synth_$(SEED).err
+output = /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_30_synth_$(SEED).out
+log = /home/sbing/thesis/git/TimeGAN/experiments/robust_timegan_exps/less_pats/vent_bin_30_synth_$(SEED).log
 
 queue 1 SEED in 1991, 3551, 6696, 0, 42
