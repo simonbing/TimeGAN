@@ -210,8 +210,16 @@ def get_synth_labels(labels_orig, split=None):
   if split is None:
     return labels_orig
   else:
-    labels = np.random.choice([0., 1.], size=len(labels_orig), p=[1-split, split])
-    # expand dims
+    ### Augment mode ###
+    curr_split = np.sum(labels_orig) / (labels_orig.shape[0] * labels_orig.shape[1])
+    tot_num_samples = len(labels_orig)
+    p_have = int(curr_split * tot_num_samples)
+    n_have = tot_num_samples - p_have
+    p_add = int((split / (1 - split)) * n_have - p_have)
+    labels = np.ones(p_add)
+    ####################
+    # labels = np.random.choice([0., 1.], size=len(labels_orig), p=[1-split, split])
+    # Expand dims
     seq_len = labels_orig.shape[1]
     labels = np.transpose(np.tile(labels, (1, seq_len, 1)), (2,1,0)).astype(np.float32)
     return labels
