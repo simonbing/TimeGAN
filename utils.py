@@ -211,7 +211,8 @@ def get_synth_labels(labels_orig, split=None):
     return labels_orig
   else:
     ### Augment mode ###
-    curr_split = np.sum(labels_orig) / (labels_orig.shape[0] * labels_orig.shape[1])
+    # curr_split = np.sum(labels_orig) / (labels_orig.shape[0] * labels_orig.shape[1])
+    curr_split = 0.007
     tot_num_samples = len(labels_orig)
     p_have = int(curr_split * tot_num_samples)
     n_have = tot_num_samples - p_have

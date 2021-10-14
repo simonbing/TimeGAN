@@ -2,9 +2,9 @@ executable = /home/sbing/miniconda3/envs/timegan/bin/python3
 arguments = "/home/sbing/thesis/git/TimeGAN/main_timegan.py --seed $(SEED) \
 --features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/down_samp/vent_bin/X_vent_bin_07.npz \
 --labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/down_samp/vent_bin/y_vent_bin_07.npz \
---out_path /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_8_aug_$(SEED) \
---data_name mimic --hidden_dim 32 --batch_size 64 --num_layer 5 --epochs 100 --split 0.08 --save True \
---group vent_bin_down_samp --subgroup 'timegan, 8% AUG' --run_name 'seed: $(SEED)'"
+--out_path /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_1_aug_$(SEED) \
+--data_name mimic --hidden_dim 32 --batch_size 64 --num_layer 5 --epochs 100 --split 0.01 --save True \
+--group vent_bin_down_samp --subgroup 'timegan, 1% AUG' --run_name 'seed: $(SEED)'"
 
 request_memory = 64000
 request_cpus = 8
@@ -13,9 +13,9 @@ getenv = True
 
 requirements = CUDACapability>=6.0
 
-error = /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_8_aug_$(SEED).err
-output = /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_8_aug_$(SEED).out
-log = /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_8_aug_$(SEED).log
+error = /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_1_aug_$(SEED).err
+output = /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_1_aug_$(SEED).out
+log = /work/sbing/experiments/medgen/down_samp/vent_bin/timegan_07_1_aug_$(SEED).log
 
 # queue 1 SEED in 1991, 3551, 6696, 0, 42
 queue 1 SEED in 0

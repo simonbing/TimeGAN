@@ -336,26 +336,26 @@ def timegan(ori_data, ori_labels, gen_data, gen_labels, parameters):
   gen_cond_labels = get_synth_labels(gen_labels, split=parameters['split'])
 
   ### Hack to generate more synthetic data ###
-  no_add = 54270
-  no_gen += no_add
-  add_idxs = np.random.choice(np.arange(gen_cond_labels.shape[0]), no_add, replace=False)
-  gen_time_add = [gen_time[i] for i in add_idxs]
-  gen_time += (gen_time_add)
-  gen_cond_labels_add = gen_cond_labels[add_idxs, :, :]
-  gen_cond_labels = np.concatenate((gen_cond_labels, gen_cond_labels_add), axis=0)
-  gen_data_add = gen_data[add_idxs, :, :]
-  gen_data = np.concatenate((gen_data, gen_data_add), axis=0)
+  # no_add = 54270
+  # no_gen += no_add
+  # add_idxs = np.random.choice(np.arange(gen_cond_labels.shape[0]), no_add, replace=False)
+  # gen_time_add = [gen_time[i] for i in add_idxs]
+  # gen_time += (gen_time_add)
+  # gen_cond_labels_add = gen_cond_labels[add_idxs, :, :]
+  # gen_cond_labels = np.concatenate((gen_cond_labels, gen_cond_labels_add), axis=0)
+  # gen_data_add = gen_data[add_idxs, :, :]
+  # gen_data = np.concatenate((gen_data, gen_data_add), axis=0)
   ############################################
   ### Augment ###
-  # no_gen = len(gen_cond_labels)
-  # gen_time = [25 for i in np.arange(no_gen)]
-  # pos_idxs_all = np.where(gen_labels[:,0,:] == 1.0)[0]
-  # if no_gen > len(pos_idxs_all):
-  #   replace = True
-  # else:
-  #   replace = False
-  # pos_idxs_select = np.random.choice(pos_idxs_all, no_gen, replace=replace)
-  # gen_data = gen_data[pos_idxs_select, ...]
+  no_gen = len(gen_cond_labels)
+  gen_time = [25 for i in np.arange(no_gen)]
+  pos_idxs_all = np.where(gen_labels[:,0,:] == 1.0)[0]
+  if no_gen > len(pos_idxs_all):
+    replace = True
+  else:
+    replace = False
+  pos_idxs_select = np.random.choice(pos_idxs_all, no_gen, replace=replace)
+  gen_data = gen_data[pos_idxs_select, ...]
   ###############
   Z_mb = random_generator(no_gen, z_dim, gen_cond_labels, gen_time, max_seq_len_gen)
   gen_data_and_labels = np.concatenate((gen_data, gen_cond_labels), 2)
