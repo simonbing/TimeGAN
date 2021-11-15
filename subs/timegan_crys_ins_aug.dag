@@ -1,0 +1,7 @@
+JOB A timegan.sub
+PRIORITY A -995
+
+JOB B timegan_crys_ins_eval.sub
+PRIORITY B -995
+
+PARENT A CHILD B
