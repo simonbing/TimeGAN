@@ -336,16 +336,23 @@ def timegan(ori_data, ori_labels, gen_data, gen_labels, parameters):
   gen_cond_labels = get_synth_labels(gen_labels, split=parameters['split'])
 
   ### Hack to generate more synthetic data ###
-  no_gen_final = 57113
-  no_add = no_gen_final - no_gen
-  no_gen += no_add
-  add_idxs = np.random.choice(np.arange(gen_cond_labels.shape[0]), no_add, replace=False)
-  gen_time_add = [gen_time[i] for i in add_idxs]
-  gen_time += (gen_time_add)
-  gen_cond_labels_add = gen_cond_labels[add_idxs, :, :]
-  gen_cond_labels = np.concatenate((gen_cond_labels, gen_cond_labels_add), axis=0)
-  gen_data_add = gen_data[add_idxs, :, :]
-  gen_data = np.concatenate((gen_data, gen_data_add), axis=0)
+  no_gen_final = 19820
+  if no_gen_final > no_gen:
+    no_add = no_gen_final - no_gen
+    no_gen += no_add
+    add_idxs = np.random.choice(np.arange(gen_cond_labels.shape[0]), no_add, replace=False)
+    gen_time_add = [gen_time[i] for i in add_idxs]
+    gen_time += (gen_time_add)
+    gen_cond_labels_add = gen_cond_labels[add_idxs, :, :]
+    gen_cond_labels = np.concatenate((gen_cond_labels, gen_cond_labels_add), axis=0)
+    gen_data_add = gen_data[add_idxs, :, :]
+    gen_data = np.concatenate((gen_data, gen_data_add), axis=0)
+  else:
+    idxs_subset = np.random.choice(np.arange(no_gen), no_gen_final, replace=False)
+    no_gen = no_gen_final
+    gen_data = gen_data[idxs_subset, ...]
+    gen_cond_labels = gen_cond_labels[idxs_subset]
+    gen_time = gen_time[:no_gen]
   ############################################
   ### Augment ###
   # no_gen = len(gen_cond_labels)

@@ -1,0 +1,22 @@
+executable = /home/sbing/miniconda3/envs/thesis/bin/python3
+arguments = "/home/sbing/thesis/git/MedGen/medgen/apps/evaluation.py --seed $(SEED) \
+--processed_features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/X_6hrs_15min_34472_colloid_bolus_bin_proc.npz \
+--processed_labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/y_6hrs_15min_34472_colloid_bolus_bin_proc.npz \
+--X_test_path /work/sbing/experiments/timegan/roc_per_class_eval/tgan_col_age_aug_$(SEED)/X_synth_aug.npz \
+--y_test_path /work/sbing/experiments/timegan/roc_per_class_eval/tgan_col_age_aug_$(SEED)/y_synth_aug.npz \
+--out_path /work/sbing/experiments/timegan/roc_per_class_eval/tgan_col_age_aug_$(SEED) \
+--evaluation grud --eval_epochs 100 --eval_hidden_size 64 --grud_lr 0.0005 --grud_lr_decay_step 20 \
+--debug --ROC_per_class age --group eval_age --run_name 'seed: ($(SEED))' --subgroup 'timegan col eval'"
+
+request_memory = 64000
+request_cpus = 12
+request_gpus = 1
+getenv = True
+
+requirements = CUDACapability>=6.0
+
+error = /work/sbing/experiments/timegan/roc_per_class_eval/tgan_col_age_eval_$(SEED).err
+output = /work/sbing/experiments/timegan/roc_per_class_eval/tgan_col_age_eval_$(SEED).out
+log = /work/sbing/experiments/timegan/roc_per_class_eval/tgan_col_age_eval_$(SEED).log
+
+queue 1 SEED in 6696, 3551, 1991, 0, 42
