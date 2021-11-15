@@ -1,0 +1,3 @@
+JOB A timegan.sub
+JOB B timegan_vaso_ins_eval.sub
+PARENT A CHILD B

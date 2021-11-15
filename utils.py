@@ -224,3 +224,61 @@ def get_synth_labels(labels_orig, split=None):
     seq_len = labels_orig.shape[1]
     labels = np.transpose(np.tile(labels, (1, seq_len, 1)), (2,1,0)).astype(np.float32)
     return labels
+
+def augment_data(X_real, y_real, X_synth, y_synth):
+  np.random.seed(0)  # To ensure shuffling is reproducible
+
+  # Concatenate all subsets
+  X_train = np.concatenate((X_real['X_train'], X_synth['X_train']))
+  X_val = np.concatenate((X_real['X_val'], X_synth['X_val']))
+  X_test = np.concatenate((X_real['X_test'], X_synth['X_test']))
+
+  m_train = np.concatenate((X_real['m_train'], X_synth['m_train']))
+  m_val = np.concatenate((X_real['m_val'], X_synth['m_val']))
+  m_test = np.concatenate((X_real['m_test'], X_synth['m_test']))
+
+  delta_t_train = np.concatenate((X_real['delta_t_train'], X_synth['delta_t_train']))
+  delta_t_val = np.concatenate((X_real['delta_t_val'], X_synth['delta_t_val']))
+  delta_t_test = np.concatenate((X_real['delta_t_test'], X_synth['delta_t_test']))
+
+  y_train = np.concatenate((y_real['y_train'], y_synth['y_train']))
+  y_val = np.concatenate((y_real['y_val'], y_synth['y_val']))
+  y_test = np.concatenate((y_real['y_test'], y_synth['y_test']))
+
+  # Get shuffling permutation
+  train_perm = np.arange(len(X_train))
+  val_perm = np.arange(len(X_val))
+  test_perm = np.arange(len(X_test))
+  np.random.shuffle(train_perm)
+  np.random.shuffle(val_perm)
+  np.random.shuffle(test_perm)
+
+  # Permute all arrays with with same vector
+  X_train = X_train[train_perm, ...]
+  m_train = m_train[train_perm, ...]
+  delta_t_train = delta_t_train[train_perm, ...]
+  y_train = y_train[train_perm]
+
+  X_val = X_val[val_perm, ...]
+  m_val = m_val[val_perm, ...]
+  delta_t_val = delta_t_val[val_perm, ...]
+  y_val = y_val[val_perm]
+
+  X_test = X_test[test_perm, ...]
+  m_test = m_test[test_perm, ...]
+  delta_t_test = delta_t_test[test_perm, ...]
+  y_test = y_test[test_perm]
+
+  X_aug = {'X_train': X_train,
+           'X_val': X_val,
+           'X_test': X_test,
+           'm_train': m_train,
+           'm_val': m_val,
+           'm_test': m_test,
+           'delta_t_train': delta_t_train,
+           'delta_t_val': delta_t_val,
+           'delta_t_test': delta_t_test}
+
+  y_aug = {'y_train': y_train, 'y_val': y_val, 'y_test': y_test}
+
+  return X_aug, y_aug

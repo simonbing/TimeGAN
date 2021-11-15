@@ -29,7 +29,8 @@ from __future__ import print_function
 import argparse
 import numpy as np
 import tensorflow as tf
-from utils import reshape_synth_data
+from utils import reshape_synth_data, augment_data
+# from medgen.eval import GRUDEvaluator
 import os
 import wandb
 import warnings
@@ -103,6 +104,55 @@ def main (args):
       np.savez(os.path.join(args.out_path,'X_synth.npz'), **X_synth_dict)
       np.savez(os.path.join(args.out_path,'y_synth.npz'), **y_synth_dict)
       print('Saved reshaped generated data!')
+      # Augment real data with generated data if necessary
+      # Load real data dict
+      X_real_dict = np.load(args.features_path)
+      y_real_dict = np.load(args.labels_path)
+      X_aug_dict, y_aug_dict = augment_data(X_real_dict, y_real_dict, X_synth_dict, y_synth_dict)
+      np.savez(os.path.join(args.out_path, 'X_synth_aug.npz'), **X_aug_dict)
+      np.savez(os.path.join(args.out_path, 'y_synth_aug.npz'), **y_aug_dict)
+      print('Saved augmented generated data!')
+
+  # Evaluation
+  # evaluator = GRUDEvaluator(seed=args.seed, eval_mode='synth', batch_size=64,
+  #                           hidden_size=64, num_layers=1, dropout=0.1)
+  #
+  # X_synth_train, X_synth_val, X_synth_test, \
+  # y_synth_train, y_synth_val, y_synth_test = evaluator.get_data(X_aug_dict, y_aug_dict)
+  #
+  # X_real_train, X_real_val, X_real_test, \
+  # y_real_train, y_real_val, y_real_test = evaluator.get_data(X_real_dict, y_real_dict)
+  #
+  # # Train evaluator on synthetic data
+  # evaluator.train_evaluator(X_synth_train, X_synth_val, y_synth_train, y_synth_val)
+  # eval_score_synth = evaluator.evaluate(X_real_test, y_real_test)
+  #
+  # if FLAGS.ROC_per_class is not None:
+  #     if FLAGS.ROC_per_class == 'gender':
+  #         feature_map = ['female', 'male']
+  #     elif FLAGS.ROC_per_class == 'age':
+  #         feature_map = ['<30', '31-50', '51-70', '>70']
+  #     elif FLAGS.ROC_per_class == 'ethnicity':
+  #         feature_map = ['white', 'black', 'hisp', 'asian', 'other']
+  #     elif FLAGS.ROC_per_class == 'insurance':
+  #         feature_map = ['medicare', 'medicaid', 'private', 'government', 'self']
+  #
+  #     X_split, y_split = split_labels_per_class(X_real_test, y_real_test,
+  #                                               y_real['c_test'],
+  #                                               y_real['feature_names'],
+  #                                               stat_feat=FLAGS.ROC_per_class)
+  #     for num, X_test_split in enumerate(X_split):
+  #         eval_score_split = self.evaluator_synth.evaluate(X_test_split,
+  #                                                          y_split[num])
+  #         wandb.run.summary.update({F'ROC {feature_map[num]}': eval_score_split})
+  #
+  #     wandb.run.summary.update({'eval_score': eval_score_synth})
+  #
+  # else:
+  #   logging.info(F'Evaluation score on synthetic data: {eval_score_synth}.')
+  #   wandb.run.summary.update({'eval_score_synth': eval_score_synth})
+
+
   
   ## Performance metrics   
   # Output initialization
@@ -132,6 +182,8 @@ def main (args):
   # print(metric_results)
 
   metric_results = None
+
+  ori_data = None
 
   return ori_data, generated_data, metric_results
 
