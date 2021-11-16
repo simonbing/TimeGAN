@@ -336,7 +336,7 @@ def timegan(ori_data, ori_labels, gen_data, gen_labels, parameters):
   gen_cond_labels = get_synth_labels(gen_labels, split=parameters['split'])
 
   ### Hack to generate more synthetic data ###
-  no_gen_final = 19820
+  no_gen_final = 57113
   if no_gen_final > no_gen:
     no_add = no_gen_final - no_gen
     no_gen += no_add
