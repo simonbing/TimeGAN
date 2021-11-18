@@ -106,12 +106,12 @@ def main (args):
       print('Saved reshaped generated data!')
       # Augment real data with generated data if necessary
       # Load real data dict
-      X_real_dict = np.load(args.features_path)
-      y_real_dict = np.load(args.labels_path)
-      X_aug_dict, y_aug_dict = augment_data(X_real_dict, y_real_dict, X_synth_dict, y_synth_dict)
-      np.savez(os.path.join(args.out_path, 'X_synth_aug.npz'), **X_aug_dict)
-      np.savez(os.path.join(args.out_path, 'y_synth_aug.npz'), **y_aug_dict)
-      print('Saved augmented generated data!')
+      # X_real_dict = np.load(args.features_path)
+      # y_real_dict = np.load(args.labels_path)
+      # X_aug_dict, y_aug_dict = augment_data(X_real_dict, y_real_dict, X_synth_dict, y_synth_dict)
+      # np.savez(os.path.join(args.out_path, 'X_synth_aug.npz'), **X_aug_dict)
+      # np.savez(os.path.join(args.out_path, 'y_synth_aug.npz'), **y_aug_dict)
+      # print('Saved augmented generated data!')
 
   # Evaluation
   # evaluator = GRUDEvaluator(seed=args.seed, eval_mode='synth', batch_size=64,

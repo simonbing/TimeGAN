@@ -1,10 +1,10 @@
 executable = /home/sbing/miniconda3/envs/timegan/bin/python3
 arguments = "/home/sbing/thesis/git/TimeGAN/main_timegan.py --seed $(SEED) \
---features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/X_6hrs_15min_34472_crystalloid_bolus_bin_proc.npz \
---labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/y_6hrs_15min_34472_crystalloid_bolus_bin_proc.npz \
---out_path /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_crystalloid_bin_$(SEED) \
+--features_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/X_6hrs_15min_34472_colloid_bolus_bin_proc.npz \
+--labels_path /work/sbing/datasets/mimiciii/processed/15_mins_all/include_static/y_6hrs_15min_34472_colloid_bolus_bin_proc.npz \
+--out_path /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_colloid_bin_RE_$(SEED) \
 --data_name mimic --hidden_dim 32 --batch_size 64 --num_layer 5 --epochs 100 --save True \
---group timegan_ethnicity --subgroup 'crystalloid' --run_name 'seed: $(SEED)'"
+--group timegan_exps --subgroup 'colloid RE' --run_name 'seed: $(SEED)'"
 
 request_memory = 64000
 request_cpus = 8
@@ -13,12 +13,12 @@ getenv = True
 
 requirements = CUDACapability>=6.0
 
-error = /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_crystalloid_bin_$(SEED).err
-output = /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_crystalloid_bin_$(SEED).out
-log = /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_crystalloid_bin_$(SEED).log
+error = /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_colloid_bin_RE_$(SEED).err
+output = /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_colloid_bin_RE_$(SEED).out
+log = /home/sbing/thesis/git/TimeGAN/experiments/ethnicity_exps/all_pats/full_data_colloid_bin_RE_$(SEED).log
 
-# queue 1 SEED in 1991, 3551, 6696, 0, 42
-queue 1 SEED in 1991, 3551
+queue 1 SEED in 8279, 23040,  8794, 31148,  3210
+#queue 1 SEED in 1991, 3551
 
 #queue 1 HID_DIM, NUM_LAYER, BS from (
 #  32, 5, 64
